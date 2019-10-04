@@ -2,7 +2,7 @@ const bleno = require("@abandonware/bleno");
 const EventEmitter = require('events');
 
 // Choose a concise name for your device
-const PERIPHERAL_NAME = "railgun";
+const PERIPHERAL_NAME = "railgunjfd";
 
 // UUID of a Battery Service following SIG
 // https://www.bluetooth.com/wp-content/uploads/Sitecore-Media-Library/Gatt/Xml/Services/org.bluetooth.service.battery_service.xml
