@@ -23,7 +23,7 @@ class RailGun extends EventEmitter {
 
     setInterval(() => {
       this.use_power(1);
-    }, 5000);
+    },60000);
   }
 
   fire() {
@@ -56,7 +56,7 @@ let hugeCannon = new RailGun();
 
 setInterval(() => {
   hugeCannon.fire();
-}, 8000);
+},60000);
 
 class RailgunChargeCharacteristic extends bleno.Characteristic {
     constructor(railgun) {
