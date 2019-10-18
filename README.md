@@ -1,5 +1,5 @@
 # RailgunJFD
-
+Jurne Decadt, Frederik Feys en Dieter Debou
 
 ## PM2 Service
 
