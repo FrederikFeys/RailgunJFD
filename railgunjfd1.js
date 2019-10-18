@@ -13,9 +13,9 @@ const BATTERY_SERVICE_UUID = "180F";
 const BATTERY_LEVEL_CHARACTERISTIC_UUID = "2A19";
 
 // Custom
-const RAILGUN_COMMAND_SERVICE_UUID = "eac9cf2d-1d6e-4ab5-8582-bdc124b15e52";
+const RAILGUN_COMMAND_SERVICE_UUID = "f192a50a-e7d9-48c4-9389-dc51e8d33f00";
 const RAILGUN_CHARGE_CHARACTERISTIC_UUID = "b65a60ce-b0e9-43a3-a991-4a908a5705bc";
-const RAILGUN_SHOOT_CHARACTERISTIC_UUID = "f17315d2-83e5-4f5e-9893-216ab8c5d9d6";
+const RAILGUN_SHOOT_CHARACTERISTIC_UUID = "1f646ed4-1e89-4fe0-805c-e3e45e72b52c";
 
 class RailGun extends EventEmitter {
   constructor() {
@@ -27,9 +27,9 @@ class RailGun extends EventEmitter {
     }, 60000);
   }
 
-  fire() {
-    if (this.batteryLevel >= 10) {
-      this.use_power(10);
+  fire(firepower) {
+    if (this.batteryLevel >= firepower) {
+      this.use_power(firepower);
       console.log(`Cannon goes boom (${this.batteryLevel}% power left)`);
     } else {
       console.log(`Cannon goes pffff - sorry out of power (${this.batteryLevel}% power left)`);
@@ -50,6 +50,7 @@ class RailGun extends EventEmitter {
   charge(deltaPercentage) {
     this.batteryLevel = Math.min(100, this.batteryLevel + deltaPercentage);
     this.emit('batteryLevelChanged', {'battery_level': this.batteryLevel});
+    //console.log(`Charged battery to: ${this.batteryLevel}%`);
   }
 }
 
@@ -62,7 +63,7 @@ class RailgunChargeCharacteristic extends bleno.Characteristic {
             descriptors: [
                 new bleno.Descriptor({
                     uuid: "2901",
-                    value: "Charge Railgun"
+                    value: "Charge"
                   })
             ]
         });
@@ -80,7 +81,7 @@ class RailgunChargeCharacteristic extends bleno.Characteristic {
             let value = data.readUInt8();
             console.log(`Received command to charge railgun: ${value}`);
             this.railgun.charge(value);
-            callback(this.RESULT_SUCCESS);
+            callback(this.RESULT_SUCCESS);`
         } catch (err) {
             console.error(err);
             callback(this.RESULT_UNLIKELY_ERROR);
@@ -97,7 +98,7 @@ class RailgunShootCharacteristic extends bleno.Characteristic {
             descriptors: [
                 new bleno.Descriptor({
                     uuid: "2901",
-                    value: "Shooting Railgun"
+                    value: "Shoot"
                   })
             ]
         });
@@ -113,8 +114,7 @@ class RailgunShootCharacteristic extends bleno.Characteristic {
             }
 
             let value = data.readUInt8();
-            console.log(`Received command to shoot railgun: ${value}`);
-            this.railgun.fire();
+            this.railgun.fire(value);
             callback(this.RESULT_SUCCESS);
         } catch (err) {
             console.error(err);
