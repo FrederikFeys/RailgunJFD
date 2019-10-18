@@ -2,7 +2,7 @@ const bleno = require("@abandonware/bleno");
 const EventEmitter = require('events');
 
 // Choose a concise name for your device
-const PERIPHERAL_NAME = "railgunjfdjurne";
+const PERIPHERAL_NAME = "railgunjFd";
 
 // UUID of a Battery Service following SIG
 // https://www.bluetooth.com/wp-content/uploads/Sitecore-Media-Library/Gatt/Xml/Services/org.bluetooth.service.battery_service.xml
@@ -13,7 +13,7 @@ const BATTERY_SERVICE_UUID = "180F";
 const BATTERY_LEVEL_CHARACTERISTIC_UUID = "2A19";
 
 // Custom
-const RAILGUN_COMMAND_SERVICE_UUID = "eac9cf2d-1d6e-4ab5-8582-bdc124b15e52";
+const RAILGUN_COMMAND_SERVICE_UUID = "f192a50a-e7d9-48c4-9389-dc51e8d33f00";
 const RAILGUN_CHARGE_CHARACTERISTIC_UUID = "b65a60ce-b0e9-43a3-a991-4a908a5705bc";
 
 class RailGun extends EventEmitter {
@@ -23,9 +23,7 @@ class RailGun extends EventEmitter {
 
     setInterval(() => {
       this.use_power(1);
-      // console.log("boom");
-      console.log(this.batteryLevel);
-    }, 5000);
+    },60000);
   }
 
   fire() {
@@ -58,7 +56,7 @@ let hugeCannon = new RailGun();
 
 setInterval(() => {
   hugeCannon.fire();
-}, 80000);
+},60000);
 
 class RailgunChargeCharacteristic extends bleno.Characteristic {
     constructor(railgun) {
