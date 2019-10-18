@@ -27,9 +27,9 @@ class RailGun extends EventEmitter {
     }, 60000);
   }
 
-  fire(firepower) {
-    if (this.batteryLevel >= firepower) {
-      this.use_power(firepower);
+  fire(firePower) {
+    if (this.batteryLevel >= firePower) {
+      this.use_power(firePower);
       console.log(`Cannon goes boom (${this.batteryLevel}% power left)`);
     } else {
       console.log(`Cannon goes pffff - sorry out of power (${this.batteryLevel}% power left)`);
@@ -50,7 +50,6 @@ class RailGun extends EventEmitter {
   charge(deltaPercentage) {
     this.batteryLevel = Math.min(100, this.batteryLevel + deltaPercentage);
     this.emit('batteryLevelChanged', {'battery_level': this.batteryLevel});
-    //console.log(`Charged battery to: ${this.batteryLevel}%`);
   }
 }
 
@@ -81,7 +80,7 @@ class RailgunChargeCharacteristic extends bleno.Characteristic {
             let value = data.readUInt8();
             console.log(`Received command to charge railgun: ${value}`);
             this.railgun.charge(value);
-            callback(this.RESULT_SUCCESS);`
+            callback(this.RESULT_SUCCESS);
         } catch (err) {
             console.error(err);
             callback(this.RESULT_UNLIKELY_ERROR);
@@ -114,6 +113,7 @@ class RailgunShootCharacteristic extends bleno.Characteristic {
             }
 
             let value = data.readUInt8();
+            console.log(`Received command to shoot railgun: ${value}`);
             this.railgun.fire(value);
             callback(this.RESULT_SUCCESS);
         } catch (err) {
