@@ -15,17 +15,16 @@ const BATTERY_LEVEL_CHARACTERISTIC_UUID = "2A19";
 // Custom
 const RAILGUN_COMMAND_SERVICE_UUID = "eac9cf2d-1d6e-4ab5-8582-bdc124b15e52";
 const RAILGUN_CHARGE_CHARACTERISTIC_UUID = "b65a60ce-b0e9-43a3-a991-4a908a5705bc";
+const RAILGUN_SHOOT_CHARACTERISTIC_UUID = "f17315d2-83e5-4f5e-9893-216ab8c5d9d6";
 
 class RailGun extends EventEmitter {
   constructor() {
     super();
     this.batteryLevel = 100;
-
+    
     setInterval(() => {
       this.use_power(1);
-      // console.log("boom");
-      console.log(this.batteryLevel);
-    }, 5000);
+    }, 60000);
   }
 
   fire() {
@@ -53,12 +52,6 @@ class RailGun extends EventEmitter {
     this.emit('batteryLevelChanged', {'battery_level': this.batteryLevel});
   }
 }
-
-let hugeCannon = new RailGun();
-
-setInterval(() => {
-  hugeCannon.fire();
-}, 80000);
 
 class RailgunChargeCharacteristic extends bleno.Characteristic {
     constructor(railgun) {
@@ -94,7 +87,41 @@ class RailgunChargeCharacteristic extends bleno.Characteristic {
         }
     }
 }
+let hugeCannon = new RailGun;
+class RailgunShootCharacteristic extends bleno.Characteristic {
+    constructor(railgun) {
+        super({
+            uuid: RAILGUN_SHOOT_CHARACTERISTIC_UUID,
+            properties: ["write"],
+            value: null,
+            descriptors: [
+                new bleno.Descriptor({
+                    uuid: "2901",
+                    value: "Shooting Railgun"
+                  })
+            ]
+        });
 
+        this.railgun = railgun;
+    }
+
+    onWriteRequest(data, offset, withoutResponse, callback) {
+        try {
+            if(data.length != 1) {
+                callback(this.RESULT_INVALID_ATTRIBUTE_LENGTH);
+                return;
+            }
+
+            let value = data.readUInt8();
+            console.log(`Received command to shoot railgun: ${value}`);
+            this.railgun.fire();
+            callback(this.RESULT_SUCCESS);
+        } catch (err) {
+            console.error(err);
+            callback(this.RESULT_UNLIKELY_ERROR);
+        }
+    }
+}
 class BatteryLevelCharacteristic extends bleno.Characteristic {
   constructor(railgun) {
     super({
@@ -129,8 +156,7 @@ class BatteryLevelCharacteristic extends bleno.Characteristic {
   onSubscribe(maxValueSize, updateValueCallback) {
     console.log(`Client subscribed to battery level`);
     this.updateValueCallback = updateValueCallback;
-    this.railgun.on('batteryLevelChanged', (event) => this.readData(event.descriptors));
-    //this.railgun.on('batteryLevelChanged', (event) => this.sendNotification(event.battery_level));
+    this.railgun.on('batteryLevelChanged', (event) => this.sendNotification(event.battery_level));
   }
 
   onUnsubscribe() {
@@ -138,19 +164,8 @@ class BatteryLevelCharacteristic extends bleno.Characteristic {
     this.updateValueCallback = null;
   }
 
-  readData(level) {
-    if(this.updateValueCallback) {
-      console.log(`Sending notification with battery level of: ${level}%`);
-
-      let data = Buffer.alloc(1);   // Single byte
-      data.writeUInt8(level, 0);
-      this.updateValueCallback(data);
-    }
-  }
-
   sendNotification(level) {
     if(this.updateValueCallback) {
-      // readData(level);
       console.log(`Sending notification with battery level of: ${level}%`);
 
       let data = Buffer.alloc(1);   // Single byte
@@ -180,6 +195,7 @@ bleno.on("advertisingStart", err => {
       console.error(err);
       return;
   }
+
   let batteryService = new bleno.PrimaryService({
       uuid: BATTERY_SERVICE_UUID,
       characteristics: [
@@ -190,7 +206,8 @@ bleno.on("advertisingStart", err => {
   let commandService = new bleno.PrimaryService({
       uuid: RAILGUN_COMMAND_SERVICE_UUID,
       characteristics: [
-          new RailgunChargeCharacteristic(hugeCannon)
+          new RailgunChargeCharacteristic(hugeCannon),
+          new RailgunShootCharacteristic(hugeCannon)
       ]
   });
 
